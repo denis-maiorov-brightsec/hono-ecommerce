@@ -14,7 +14,8 @@ async function createProduct(
   app: ReturnType<typeof createApp>,
   payload: {
     name: string;
-    sku: string;
+    stockKeepingUnit?: string;
+    sku?: string;
     price: number;
     status: string;
     categoryId?: number;
@@ -51,7 +52,7 @@ describe("products CRUD routes", () => {
       },
       body: JSON.stringify({
         name: "Keyboard",
-        sku: "KEY-001",
+        stockKeepingUnit: "KEY-001",
         price: 99.99,
         status: "active",
         categoryId: 10
@@ -62,7 +63,7 @@ describe("products CRUD routes", () => {
     const created = await createResponse.json();
     expect(created).toMatchObject({
       name: "Keyboard",
-      sku: "KEY-001",
+      stockKeepingUnit: "KEY-001",
       price: 99.99,
       status: "active",
       categoryId: 10
@@ -85,7 +86,7 @@ describe("products CRUD routes", () => {
     expect(listed.items[0]).toMatchObject({
       id: created.id,
       name: "Keyboard",
-      sku: "KEY-001",
+      stockKeepingUnit: "KEY-001",
       price: 99.99,
       status: "active",
       categoryId: 10
@@ -97,7 +98,7 @@ describe("products CRUD routes", () => {
     expect(fetched).toMatchObject({
       id: created.id,
       name: "Keyboard",
-      sku: "KEY-001",
+      stockKeepingUnit: "KEY-001",
       price: 99.99,
       status: "active",
       categoryId: 10
@@ -119,7 +120,7 @@ describe("products CRUD routes", () => {
     expect(patched).toMatchObject({
       id: created.id,
       name: "Keyboard",
-      sku: "KEY-001",
+      stockKeepingUnit: "KEY-001",
       price: 89.5,
       status: "archived",
       categoryId: 10
@@ -150,7 +151,7 @@ describe("products CRUD routes", () => {
       },
       body: JSON.stringify({
         name: "Mouse",
-        sku: "MOU-001",
+        stockKeepingUnit: "MOU-001",
         price: 0,
         status: "active"
       })
@@ -170,22 +171,45 @@ describe("products CRUD routes", () => {
     ]);
   });
 
+  it("returns 400 when neither stockKeepingUnit nor deprecated sku is provided", async () => {
+    const response = await app.request("/v1/products", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        name: "Mouse",
+        price: 10,
+        status: "active"
+      })
+    });
+
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.error.details).toEqual([
+      {
+        field: "stockKeepingUnit",
+        constraints: ["stockKeepingUnit must not be empty"]
+      }
+    ]);
+  });
+
   it("supports pagination defaults and page/limit query params", async () => {
     const first = await createProduct(app, {
       name: "Keyboard",
-      sku: "KEY-001",
+      stockKeepingUnit: "KEY-001",
       price: 99.99,
       status: "active"
     });
     const second = await createProduct(app, {
       name: "Mouse",
-      sku: "MOU-001",
+      stockKeepingUnit: "MOU-001",
       price: 39.99,
       status: "active"
     });
     const third = await createProduct(app, {
       name: "Display",
-      sku: "DSP-001",
+      stockKeepingUnit: "DSP-001",
       price: 229.99,
       status: "active"
     });
@@ -218,7 +242,7 @@ describe("products CRUD routes", () => {
     expect(pagedBody.items[0]).toMatchObject({
       id: third.id,
       name: "Display",
-      sku: "DSP-001",
+      stockKeepingUnit: "DSP-001",
       price: 229.99,
       status: "active",
       categoryId: null
@@ -269,7 +293,7 @@ describe("products CRUD routes", () => {
       },
       body: JSON.stringify({
         name: "Display",
-        sku: "DSP-001",
+        stockKeepingUnit: "DSP-001",
         price: 229.99,
         status: "active"
       })
@@ -322,5 +346,102 @@ describe("products CRUD routes", () => {
       code: "NOT_FOUND",
       message: "Product not found"
     });
+  });
+
+  it("accepts deprecated sku alias on create and patch while responding with stockKeepingUnit", async () => {
+    const createResponse = await app.request("/v1/products", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        name: "Dock",
+        sku: "DOCK-001",
+        price: 119.99,
+        status: "active"
+      })
+    });
+
+    expect(createResponse.status).toBe(201);
+    const created = await createResponse.json();
+    expect(created).toMatchObject({
+      name: "Dock",
+      stockKeepingUnit: "DOCK-001",
+      price: 119.99,
+      status: "active",
+      categoryId: null
+    });
+    expect(created.sku).toBeUndefined();
+
+    const patchResponse = await app.request(`/v1/products/${created.id}`, {
+      method: "PATCH",
+      headers: {
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        sku: "DOCK-002"
+      })
+    });
+
+    expect(patchResponse.status).toBe(200);
+    const patched = await patchResponse.json();
+    expect(patched.stockKeepingUnit).toBe("DOCK-002");
+    expect(patched.sku).toBeUndefined();
+  });
+
+  it("returns 400 when stockKeepingUnit and deprecated sku conflict", async () => {
+    const createConflictResponse = await app.request("/v1/products", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        name: "Cable",
+        stockKeepingUnit: "CBL-001",
+        sku: "CBL-002",
+        price: 14.99,
+        status: "active"
+      })
+    });
+
+    expect(createConflictResponse.status).toBe(400);
+    const createConflictBody = await createConflictResponse.json();
+    expect(createConflictBody.error.details).toEqual([
+      {
+        field: "stockKeepingUnit",
+        constraints: [
+          "stockKeepingUnit and deprecated sku must match when both are provided"
+        ]
+      }
+    ]);
+
+    const created = await createProduct(app, {
+      name: "Webcam",
+      stockKeepingUnit: "CAM-001",
+      price: 79.99,
+      status: "active"
+    });
+
+    const patchConflictResponse = await app.request(`/v1/products/${created.id}`, {
+      method: "PATCH",
+      headers: {
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        stockKeepingUnit: "CAM-002",
+        sku: "CAM-003"
+      })
+    });
+
+    expect(patchConflictResponse.status).toBe(400);
+    const patchConflictBody = await patchConflictResponse.json();
+    expect(patchConflictBody.error.details).toEqual([
+      {
+        field: "stockKeepingUnit",
+        constraints: [
+          "stockKeepingUnit and deprecated sku must match when both are provided"
+        ]
+      }
+    ]);
   });
 });

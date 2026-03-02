@@ -14,7 +14,8 @@ async function createProduct(
   app: ReturnType<typeof createApp>,
   payload: {
     name: string;
-    sku: string;
+    stockKeepingUnit?: string;
+    sku?: string;
     price: number;
     status: string;
     categoryId?: number;
@@ -43,22 +44,22 @@ describe("products search route", () => {
     await db.delete(products);
   });
 
-  it("searches across product name and sku with deterministic ordering", async () => {
+  it("searches across product name and stockKeepingUnit with deterministic ordering", async () => {
     const keyboard = await createProduct(app, {
       name: "Keyboard Pro",
-      sku: "KEY-001",
+      stockKeepingUnit: "KEY-001",
       price: 99.99,
       status: "active"
     });
     await createProduct(app, {
       name: "Gaming Mouse",
-      sku: "MOU-002",
+      stockKeepingUnit: "MOU-002",
       price: 59.99,
       status: "active"
     });
     const stand = await createProduct(app, {
       name: "Laptop Stand",
-      sku: "STAND-KEY-XL",
+      stockKeepingUnit: "STAND-KEY-XL",
       price: 49.99,
       status: "active"
     });
@@ -76,7 +77,7 @@ describe("products search route", () => {
     expect(body[0]).toMatchObject({
       id: keyboard.id,
       name: "Keyboard Pro",
-      sku: "KEY-001",
+      stockKeepingUnit: "KEY-001",
       price: 99.99,
       status: "active",
       categoryId: null
@@ -84,7 +85,7 @@ describe("products search route", () => {
     expect(body[1]).toMatchObject({
       id: stand.id,
       name: "Laptop Stand",
-      sku: "STAND-KEY-XL",
+      stockKeepingUnit: "STAND-KEY-XL",
       price: 49.99,
       status: "active",
       categoryId: null
@@ -94,7 +95,7 @@ describe("products search route", () => {
   it("returns an empty array when no products match", async () => {
     await createProduct(app, {
       name: "Monitor",
-      sku: "MON-001",
+      stockKeepingUnit: "MON-001",
       price: 199.99,
       status: "active"
     });
@@ -136,5 +137,28 @@ describe("products search route", () => {
         constraints: ["q must not be empty"]
       }
     ]);
+  });
+
+  it("returns products created via deprecated sku alias with canonical response field", async () => {
+    await createProduct(app, {
+      name: "USB Hub",
+      sku: "USB-HUB-001",
+      price: 29.99,
+      status: "active"
+    });
+
+    const response = await app.request("/v1/search/products?q=hub");
+    expect(response.status).toBe(200);
+
+    const body = await response.json();
+    expect(body).toHaveLength(1);
+    expect(body[0]).toMatchObject({
+      name: "USB Hub",
+      stockKeepingUnit: "USB-HUB-001",
+      price: 29.99,
+      status: "active",
+      categoryId: null
+    });
+    expect(body[0].sku).toBeUndefined();
   });
 });

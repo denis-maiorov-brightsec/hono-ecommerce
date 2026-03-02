@@ -8,7 +8,7 @@ export type ProductRecord = InferSelectModel<typeof products>;
 
 export type CreateProductRecord = Pick<
   InferInsertModel<typeof products>,
-  "name" | "sku" | "price" | "status" | "categoryId"
+  "name" | "stockKeepingUnit" | "price" | "status" | "categoryId"
 >;
 
 export type UpdateProductRecord = Partial<CreateProductRecord>;
@@ -33,7 +33,10 @@ export class ProductsRepository {
       .select()
       .from(products)
       .where(
-        or(ilike(products.name, `%${query}%`), ilike(products.sku, `%${query}%`))
+        or(
+          ilike(products.name, `%${query}%`),
+          ilike(products.stockKeepingUnit, `%${query}%`)
+        )
       )
       .orderBy(asc(products.id));
   }

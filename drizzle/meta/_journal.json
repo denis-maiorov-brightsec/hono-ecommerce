@@ -29,6 +29,13 @@
       "when": 1772462828175,
       "tag": "0003_medical_aqueduct",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1772486490907,
+      "tag": "0004_sku_to_stock_keeping_unit",
+      "breakpoints": true
     }
   ]
 }

@@ -21,7 +21,7 @@ export const categories = pgTable("categories", {
 export const products = pgTable("products", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
-  sku: varchar("sku", { length: 100 }).notNull(),
+  stockKeepingUnit: varchar("stock_keeping_unit", { length: 100 }).notNull(),
   price: numeric("price", { precision: 12, scale: 2, mode: "number" }).notNull(),
   status: varchar("status", { length: 50 }).notNull(),
   categoryId: integer("category_id"),

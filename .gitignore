@@ -140,3 +140,5 @@ debug/
 # Tooling
 # -----------------------------
 .codex-runs/
+.codex/
+.mcp_data/

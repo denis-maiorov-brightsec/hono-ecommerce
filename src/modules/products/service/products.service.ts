@@ -46,6 +46,10 @@ export class ProductsService {
     return this.productsRepository.create(payload);
   }
 
+  async searchProducts(query: string): Promise<ProductRecord[]> {
+    return this.productsRepository.searchByQuery(query);
+  }
+
   async updateProduct(
     id: number,
     payload: UpdateProductRecord

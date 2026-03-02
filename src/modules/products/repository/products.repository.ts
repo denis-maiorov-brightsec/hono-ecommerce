@@ -1,4 +1,4 @@
-import { asc, count, eq } from "drizzle-orm";
+import { asc, count, eq, ilike, or } from "drizzle-orm";
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 
 import { db } from "../../../db/client";
@@ -26,6 +26,16 @@ export class ProductsRepository {
   async countAll(): Promise<number> {
     const [result] = await db.select({ total: count() }).from(products);
     return Number(result?.total ?? 0);
+  }
+
+  async searchByQuery(query: string): Promise<ProductRecord[]> {
+    return db
+      .select()
+      .from(products)
+      .where(
+        or(ilike(products.name, `%${query}%`), ilike(products.sku, `%${query}%`))
+      )
+      .orderBy(asc(products.id));
   }
 
   async findById(id: number): Promise<ProductRecord | undefined> {

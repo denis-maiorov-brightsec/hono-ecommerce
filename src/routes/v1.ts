@@ -7,6 +7,7 @@ import {
 import { createCategoriesRouter } from "../modules/categories/routes/categories.routes";
 import { createOrdersRouter } from "../modules/orders/routes/orders.routes";
 import { createPromotionsRouter } from "../modules/promotions/routes/promotions.routes";
+import { createProductSearchRouter } from "../modules/products/routes/search-products.routes";
 import { createProductsRouter } from "../modules/products/routes/products.routes";
 
 export type RegisterV1RoutesOptions = {
@@ -25,6 +26,7 @@ export function registerV1Routes(
   });
 
   v1.route("/products", createProductsRouter());
+  v1.route("/search/products", createProductSearchRouter());
   v1.route("/categories", createCategoriesRouter());
   v1.route("/orders", createOrdersRouter());
   v1.route("/promotions", createPromotionsRouter());

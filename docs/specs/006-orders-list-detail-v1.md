@@ -11,7 +11,7 @@ Introduce order read endpoints with filtering support.
   - `id`, `status`, `customerId`, `createdAt`, `updatedAt`, `items[]`, `totalAmount`
 - List filters:
   - `status`
-  - date range (`from`, `to`) or stack-equivalent query naming
+  - date range (`from`, `to`) using query params `from` and `to`
 
 ## Out of scope
 - Order creation workflow.
@@ -24,3 +24,8 @@ Introduce order read endpoints with filtering support.
 
 ## Verification
 - Integration/e2e coverage for filtered list and missing detail paths.
+
+## Stack Expectations (Bun/Hono/Drizzle)
+- Implement HTTP routes and middleware with Hono + TypeScript.
+- Use PostgreSQL persistence through Drizzle ORM for runtime feature behavior.
+- Run verification with Bun commands from `docs/STACK_PROFILE.md`.

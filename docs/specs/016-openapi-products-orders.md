@@ -4,7 +4,7 @@
 Document stabilized API surface for products and orders.
 
 ## Scope
-- Add OpenAPI (or stack-equivalent API docs) setup in app startup.
+- Add OpenAPI setup in app startup.
 - Document handlers and request/response schemas for:
   - Products endpoints
   - Orders list/detail/cancel endpoints
@@ -21,10 +21,15 @@ Document stabilized API surface for products and orders.
 - Mark deprecated request field alias (`sku`) in docs notes.
 
 ## Acceptance criteria
-- Docs endpoint (for example `/docs`) serves API docs UI/JSON.
+- Docs endpoints `/docs` (UI) and `/docs/openapi.json` (JSON) are available.
 - Products and orders routes appear with parameters and schemas.
 - Cancel endpoint is documented as a state transition operation.
 
 ## Verification
 - Manual check of generated docs UI/JSON.
 - Optional snapshot test for API docs stability.
+
+## Stack Expectations (Bun/Hono/Drizzle)
+- Implement HTTP routes and middleware with Hono + TypeScript.
+- Use PostgreSQL persistence through Drizzle ORM for runtime feature behavior.
+- Run verification with Bun commands from `docs/STACK_PROFILE.md`.

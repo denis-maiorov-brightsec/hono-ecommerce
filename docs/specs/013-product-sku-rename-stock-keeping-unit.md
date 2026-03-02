@@ -24,3 +24,8 @@ Introduce a realistic contract rename while preserving compatibility during tran
 
 ## Verification
 - Run products and search integration/e2e suites.
+
+## Stack Expectations (Bun/Hono/Drizzle)
+- Implement HTTP routes and middleware with Hono + TypeScript.
+- Use PostgreSQL persistence through Drizzle ORM for runtime feature behavior.
+- Run verification with Bun commands from `docs/STACK_PROFILE.md`.

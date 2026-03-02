@@ -31,3 +31,8 @@ Harden products API with contract-style integration/e2e coverage after iterative
 
 ## Verification
 - Run integration/e2e test command from stack profile.
+
+## Stack Expectations (Bun/Hono/Drizzle)
+- Implement HTTP routes and middleware with Hono + TypeScript.
+- Use PostgreSQL persistence through Drizzle ORM for runtime feature behavior.
+- Run verification with Bun commands from `docs/STACK_PROFILE.md`.

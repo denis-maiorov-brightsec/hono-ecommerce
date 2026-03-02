@@ -20,5 +20,10 @@ Introduce versioned routing so all new APIs live under `/v1`, while keeping a cl
 - E2E/integration test suite updated to match new behavior.
 
 ## Verification
-- Run stack-specific integration/e2e tests from `docs/STACK_PROFILE.md`.
+- Run `bun test test/integration`.
 - Manual checks for `/v1/health` and `/`.
+
+## Stack Expectations (Bun/Hono/Drizzle)
+- Implement HTTP routes and middleware with Hono + TypeScript.
+- Use PostgreSQL persistence through Drizzle ORM for runtime feature behavior.
+- Run verification with Bun commands from `docs/STACK_PROFILE.md`.

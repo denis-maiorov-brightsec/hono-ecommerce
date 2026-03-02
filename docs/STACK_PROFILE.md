@@ -1,59 +1,50 @@
 # Stack Profile
 
-Fill this file before starting implementation.
-Use it for stack/tooling decisions only; API behavior/contracts are defined by specs.
+This file is the stack/tooling contract for implementation in this repository.
+API behavior/contracts are defined by specs.
 
 ## Product Context
-- Project name: `<project-name>`
-- Domain: `<ecommerce-backoffice | other>`
-- API style: `<REST | GraphQL | RPC | mixed>`
+- Project name: `hono-ecommerce`
+- Domain: `ecommerce-backoffice`
+- API style: `REST`
 
 ## Core Tech Choices
-- Language: `<language>`
-- Runtime: `<runtime>`
-- Framework: `<framework>`
-- ORM / Data Mapper: `<orm-or-data-layer>`
-- Database: `<database>`
+- Language: `TypeScript`
+- Runtime: `Bun`
+- Framework: `Hono`
+- ORM / Data Mapper: `Drizzle ORM`
+- Database: `PostgreSQL`
 
 ## Repository Conventions
-- Package/dependency manager: `<tool>`
-- Migration strategy: `<tooling + process>`
-- Configuration style: `<env/config conventions>`
+- Package/dependency manager: `bun`
+- Migration strategy: `drizzle-kit` SQL migrations, committed under `drizzle/`; apply with repo scripts.
+- Configuration style: `.env` file for local development + explicit `src/config/env.ts` accessors.
 
 ## Repository Topology Contract
-- Source root path: `<exact path, e.g. src/>`
-- Module path pattern: `<exact pattern, e.g. src/<module>/...>`
-- Shared/common code path: `<exact path>`
-- DB/migrations path: `<exact path>`
-- Test path strategy: `<co-located | separate>` + `<exact path/pattern>`
-- API docs artifact path (if generated): `<exact path>`
-- Prohibited top-level paths (to avoid drift): `<list>`
-
-Use concrete paths, not abstract descriptions. Example:
 - Source root path: `src/`
-- Module path pattern: `src/<module>/{controller,service,repository,dto}`
+- Module path pattern: `src/modules/<module>/{routes,service,repository,dto}`
 - Shared/common code path: `src/common/`
-- DB/migrations path: `src/db/migrations/`
+- DB/migrations path: `src/db/` (schema/client) and `drizzle/` (generated SQL migrations)
 - Test path strategy: `separate` + `test/**/*.test.ts`
-- API docs artifact path: `docs/openapi.json`
-- Prohibited top-level paths: `lib/`, `misc/`
+- API docs artifact path (if generated): `docs/openapi.json`
+- Prohibited top-level paths (to avoid drift): `lib/`, `misc/`, `legacy/`
 
 ## Quality Gates
-- Lint command: `<command>`
-- Unit test command: `<command>`
-- Integration/e2e test command: `<command>`
-- Type-check/static-analysis command: `<command>`
+- Lint command: `bun run lint`
+- Unit test command: `bun test`
+- Integration/e2e test command: `bun test test/integration`
+- Type-check/static-analysis command: `bun run typecheck`
 
-## Implementation Preferences (Optional)
-- Validation library preference (for example `zod` or `ajv`): `<optional>`
-- Logging library preference: `<optional>`
-- API docs tool preference (OpenAPI/Swagger/etc): `<optional>`
-- Auth library preference: `<optional>`
+## Implementation Preferences
+- Validation library preference: `zod`
+- Logging library preference: `pino`
+- API docs tool preference: `@hono/zod-openapi` with OpenAPI JSON output
+- Auth library preference: `hono/jwt` middleware pattern for stubs
 
 ## Additional Constraints
-- Performance/security/compliance requirements: `<constraints>`
-- Deployment/runtime environment: `<environment>`
-- Backward-compatibility rules: `<rules>`
+- Performance/security/compliance requirements: keep handlers stateless, sanitize internal errors, and avoid logging secrets/PII.
+- Deployment/runtime environment: containerized Bun service + managed PostgreSQL in non-local environments.
+- Backward-compatibility rules: preserve existing route behavior unless the active spec explicitly changes it.
 
 ## Precedence Rules
 - Specs are the source of truth for API behavior and contracts.

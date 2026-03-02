@@ -19,3 +19,8 @@ Protect write-heavy endpoints from abuse using basic rate limiting.
 
 ## Verification
 - Integration tests for throttled and non-throttled paths.
+
+## Stack Expectations (Bun/Hono/Drizzle)
+- Implement HTTP routes and middleware with Hono + TypeScript.
+- Use PostgreSQL persistence through Drizzle ORM for runtime feature behavior.
+- Run verification with Bun commands from `docs/STACK_PROFILE.md`.

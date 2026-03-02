@@ -4,7 +4,7 @@
 Apply a late-stage structural refactor to consolidate request DTO/schema definitions.
 
 ## Scope
-- Move request DTO/schema definitions into `/dto` (or stack-equivalent) folders per module.
+- Move request DTO/schema definitions into `/dto` folders per module.
 - Update imports and wiring across products/orders/categories/promotions modules.
 - Keep runtime behavior unchanged.
 
@@ -19,3 +19,8 @@ Apply a late-stage structural refactor to consolidate request DTO/schema definit
 
 ## Verification
 - Run full lint/type-check/test suite.
+
+## Stack Expectations (Bun/Hono/Drizzle)
+- Implement HTTP routes and middleware with Hono + TypeScript.
+- Use PostgreSQL persistence through Drizzle ORM for runtime feature behavior.
+- Run verification with Bun commands from `docs/STACK_PROFILE.md`.

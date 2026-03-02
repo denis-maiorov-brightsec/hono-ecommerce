@@ -20,3 +20,8 @@ Add a lightweight product search endpoint that reuses products service/repositor
 
 ## Verification
 - Integration/e2e tests for search behavior and edge cases.
+
+## Stack Expectations (Bun/Hono/Drizzle)
+- Implement HTTP routes and middleware with Hono + TypeScript.
+- Use PostgreSQL persistence through Drizzle ORM for runtime feature behavior.
+- Run verification with Bun commands from `docs/STACK_PROFILE.md`.

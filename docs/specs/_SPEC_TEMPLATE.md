@@ -18,5 +18,10 @@
 - <Observable criterion>
 
 ## Verification
-- <Exact test command>
+- `bun test` (or a narrower `bun test <path>` command for touched modules)
 - <Manual/API checks if needed>
+
+## Stack Expectations (Bun/Hono/Drizzle)
+- Implement HTTP routes and middleware with Hono + TypeScript.
+- Use PostgreSQL persistence through Drizzle ORM for runtime feature behavior.
+- Run verification with Bun commands from `docs/STACK_PROFILE.md`.

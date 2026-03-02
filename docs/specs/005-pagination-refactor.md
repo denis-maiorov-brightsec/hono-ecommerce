@@ -19,3 +19,8 @@ Consolidate list-query pagination behavior into a shared reusable helper.
 
 ## Verification
 - Integration/e2e tests for valid/invalid pagination combinations.
+
+## Stack Expectations (Bun/Hono/Drizzle)
+- Implement HTTP routes and middleware with Hono + TypeScript.
+- Use PostgreSQL persistence through Drizzle ORM for runtime feature behavior.
+- Run verification with Bun commands from `docs/STACK_PROFILE.md`.

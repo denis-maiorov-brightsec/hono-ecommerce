@@ -20,3 +20,8 @@ Improve observability with per-request correlation IDs and structured logs.
 
 ## Verification
 - Integration tests plus manual request/response header checks.
+
+## Stack Expectations (Bun/Hono/Drizzle)
+- Implement HTTP routes and middleware with Hono + TypeScript.
+- Use PostgreSQL persistence through Drizzle ORM for runtime feature behavior.
+- Run verification with Bun commands from `docs/STACK_PROFILE.md`.

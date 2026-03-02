@@ -18,3 +18,8 @@ Improve internal orders module structure without changing external behavior.
 
 ## Verification
 - Run orders-related tests and regression e2e suite.
+
+## Stack Expectations (Bun/Hono/Drizzle)
+- Implement HTTP routes and middleware with Hono + TypeScript.
+- Use PostgreSQL persistence through Drizzle ORM for runtime feature behavior.
+- Run verification with Bun commands from `docs/STACK_PROFILE.md`.

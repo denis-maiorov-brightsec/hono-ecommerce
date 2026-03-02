@@ -28,3 +28,8 @@ Introduce promotions management for ecommerce campaigns.
 
 ## Verification
 - Run resource-specific and e2e tests.
+
+## Stack Expectations (Bun/Hono/Drizzle)
+- Implement HTTP routes and middleware with Hono + TypeScript.
+- Use PostgreSQL persistence through Drizzle ORM for runtime feature behavior.
+- Run verification with Bun commands from `docs/STACK_PROFILE.md`.

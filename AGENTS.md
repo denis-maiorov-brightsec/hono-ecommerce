@@ -1,11 +1,14 @@
 # Spec-Driven Implementation Agent Guide
 
 ## Objective
-This repository is used to simulate iterative ecommerce backoffice API development through dependency-ordered specs.
+This repository simulates iterative ecommerce backoffice API development through dependency-ordered specs.
 Agents must implement work from `docs/specs/` one spec at a time, in order, with realistic churn (new endpoints, contract changes, refactors, deprecations).
 
-Target stack is defined in:
-- `docs/STACK_PROFILE.md`
+Target stack is fixed to:
+- Runtime + language: Bun + TypeScript
+- HTTP framework: Hono
+- Persistence: Drizzle ORM + PostgreSQL
+- Package manager + test runner: bun
 
 ## Source of truth
 - Backlog order and dependencies: `docs/SPECS_INDEX.md`
@@ -26,9 +29,10 @@ Target stack is defined in:
 - Preserve existing API behavior unless current spec says to change it.
 - Prefer small, reviewable changes with clear commit boundaries.
 - If blocked by missing prerequisites, stop and mark the spec as blocked with a concrete reason.
-- Implement persistence using the configured database + ORM/data layer from `docs/STACK_PROFILE.md` for all feature specs.
+- Implement persistence using Drizzle ORM + PostgreSQL for all feature specs.
 - Do not introduce or keep in-memory repositories for runtime feature behavior unless the spec explicitly allows it.
 - Write tests against real persistence/integration boundaries when feasible; avoid mock-only feature coverage.
+- Use Bun commands from `docs/STACK_PROFILE.md` for lint/test/typecheck verification.
 
 ## Definition of done (per spec)
 - All acceptance criteria from the target spec pass.

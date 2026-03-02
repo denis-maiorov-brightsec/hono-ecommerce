@@ -1,7 +1,11 @@
+import { config } from "dotenv";
 import { defineConfig } from "drizzle-kit";
 
+config();
+
 const databaseUrl =
-  Bun.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5432/hono_ecommerce";
+  process.env.DATABASE_URL ??
+  "postgresql://postgres:postgres@localhost:5432/hono_ecommerce";
 
 export default defineConfig({
   out: "./drizzle",

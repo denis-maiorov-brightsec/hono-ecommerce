@@ -8,6 +8,8 @@ const repoRoot = process.cwd();
 const defaultIndexPath = resolve(repoRoot, "docs/SPECS_INDEX.md");
 const defaultSpecsDir = resolve(repoRoot, "docs/specs");
 const defaultStackProfilePath = resolve(repoRoot, "docs/STACK_PROFILE.md");
+const defaultImplementerPromptPath = resolve(repoRoot, "prompts/02-implement-next-ready-spec.md");
+const defaultReviewerPromptPath = resolve(repoRoot, "prompts/03-review-and-fix-last-spec.md");
 
 function printUsage() {
   console.log(`Usage: node scripts/run-specs-harness.mjs [options]
@@ -29,6 +31,8 @@ Options:
   --index-path <path>       Specs index path (default: docs/SPECS_INDEX.md)
   --specs-dir <path>        Specs directory path (default: docs/specs)
   --stack-profile <path>    Stack profile path (default: docs/STACK_PROFILE.md)
+  --implementer-prompt <p>  Implementer prompt template path (default: prompts/02-implement-next-ready-spec.md)
+  --reviewer-prompt <p>     Reviewer prompt template path (default: prompts/03-review-and-fix-last-spec.md)
 
   -h, --help                Show this help
 `);
@@ -48,6 +52,8 @@ function parseArgs(argv) {
     indexPath: defaultIndexPath,
     specsDir: defaultSpecsDir,
     stackProfilePath: defaultStackProfilePath,
+    implementerPromptPath: defaultImplementerPromptPath,
+    reviewerPromptPath: defaultReviewerPromptPath,
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -121,6 +127,18 @@ function parseArgs(argv) {
 
     if (arg === "--stack-profile") {
       args.stackProfilePath = resolve(repoRoot, argv[i + 1]);
+      i += 1;
+      continue;
+    }
+
+    if (arg === "--implementer-prompt") {
+      args.implementerPromptPath = resolve(repoRoot, argv[i + 1]);
+      i += 1;
+      continue;
+    }
+
+    if (arg === "--reviewer-prompt") {
+      args.reviewerPromptPath = resolve(repoRoot, argv[i + 1]);
       i += 1;
       continue;
     }
@@ -278,55 +296,45 @@ function buildStackContext(stackProfilePath, stackProfile) {
   return lines.join("\n");
 }
 
-function buildImplementerPrompt(spec, stackContext) {
-  return `
-You are the implementation agent for one spec in this repository.
+function readPromptTemplate(promptPath, role) {
+  if (!existsSync(promptPath)) {
+    throw new Error(`Missing ${role} prompt template: ${promptPath}`);
+  }
 
-Target spec:
-- ID: ${spec.id}
-- Title: ${spec.title}
-- File: ${spec.path}
+  const content = readFileSync(promptPath, "utf8").trim();
+  if (content === "") {
+    throw new Error(`${role} prompt template is empty: ${promptPath}`);
+  }
+
+  return content;
+}
+
+function buildImplementerPrompt(spec, stackContext, template) {
+  return `
+${template}
+
+Harness context for this run (authoritative):
+- Target spec is fixed to ${spec.id} (${spec.title})
+- Target spec file: ${spec.path}
+- Do not pick another spec from docs/specs.
+- Stay on current branch; do not create or switch branches.
+- Commit implementation work before exiting using AGENTS.md commit style with spec id ${spec.id}.
 
 ${stackContext}
-
-Requirements:
-1. Follow AGENTS.md exactly.
-2. Follow docs/STACK_PROFILE.md exactly.
-3. Implement only this spec's scope; do not pull future-spec behavior.
-4. If project scaffolding for this stack is incomplete, add only the minimal foundational setup required for this spec.
-5. Run relevant lint/tests/type-check for touched areas.
-6. Update docs/SPECS_INDEX.md status/dependencies if needed.
-7. Commit your implementation work before exiting.
-
-Commit constraints:
-- Use AGENTS.md commit style with spec id ${spec.id}.
-- Keep commits small and reviewable.
-- Stay on the current branch and do not create or switch branches.
-
-Output:
-- Short summary of files changed, acceptance checklist, tests executed.
 `.trim();
 }
 
-function buildReviewerPrompt(spec, stackContext) {
+function buildReviewerPrompt(spec, stackContext, template) {
   return `
-You are the reviewer/fixer agent for one completed spec implementation.
+${template}
 
-Target spec:
-- ID: ${spec.id}
-- Title: ${spec.title}
-- File: ${spec.path}
+Harness context for this run (authoritative):
+- Review/fix only spec ${spec.id} (${spec.title})
+- Target spec file: ${spec.path}
+- Stay on current branch; do not create or switch branches.
+- If fixes are made, commit them using AGENTS.md commit style with spec id ${spec.id}.
 
 ${stackContext}
-
-Tasks:
-1. Review current branch changes for conformance to the target spec.
-2. Focus on bugs, regressions, contract mismatches, missing tests, and risky behavior.
-3. If you find small issues, apply focused fixes only (no broad refactors).
-4. Run relevant tests/lint/type-check for touched areas.
-5. If fixes were made, commit them using AGENTS.md commit style with spec id ${spec.id}.
-6. If no fixes are required, leave the tree clean and explicitly state: No fixes required.
-7. Stay on the current branch and do not create or switch branches.
 `.trim();
 }
 
@@ -398,6 +406,8 @@ function main() {
   const doneSet = new Set(specs.filter(spec => spec.status.toLowerCase() === "done").map(spec => spec.id));
   const stackProfile = readStackProfile(args.stackProfilePath);
   const stackContext = buildStackContext(args.stackProfilePath, stackProfile);
+  const implementerTemplate = readPromptTemplate(args.implementerPromptPath, "implementer");
+  const reviewerTemplate = readPromptTemplate(args.reviewerPromptPath, "reviewer");
 
   const runId = new Date().toISOString().replaceAll(":", "-");
   const runDir = resolve(repoRoot, ".codex-runs", runId);
@@ -426,7 +436,7 @@ function main() {
       codexBin: args.codexBin,
       model: args.model,
       unsafe: args.unsafe,
-      prompt: buildImplementerPrompt(next, stackContext),
+      prompt: buildImplementerPrompt(next, stackContext, implementerTemplate),
       outputFile: resolve(runDir, `${next.id}-implementer.md`),
     });
 
@@ -452,7 +462,7 @@ function main() {
       codexBin: args.codexBin,
       model: args.model,
       unsafe: args.unsafe,
-      prompt: buildReviewerPrompt(next, stackContext),
+      prompt: buildReviewerPrompt(next, stackContext, reviewerTemplate),
       outputFile: resolve(runDir, `${next.id}-reviewer.md`),
     });
 

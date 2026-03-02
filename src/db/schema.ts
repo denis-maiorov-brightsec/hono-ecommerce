@@ -1,5 +1,6 @@
 import {
   integer,
+  jsonb,
   numeric,
   pgTable,
   serial,
@@ -24,6 +25,26 @@ export const products = pgTable("products", {
   price: numeric("price", { precision: 12, scale: 2, mode: "number" }).notNull(),
   status: varchar("status", { length: 50 }).notNull(),
   categoryId: integer("category_id"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull()
+});
+
+export type OrderItem = {
+  productId: number;
+  quantity: number;
+  unitPrice: number;
+};
+
+export const orders = pgTable("orders", {
+  id: serial("id").primaryKey(),
+  status: varchar("status", { length: 50 }).notNull(),
+  customerId: integer("customer_id").notNull(),
+  items: jsonb("items").$type<OrderItem[]>().notNull(),
+  totalAmount: numeric("total_amount", {
+    precision: 12,
+    scale: 2,
+    mode: "number"
+  }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull()
 });

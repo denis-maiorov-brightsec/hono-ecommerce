@@ -2,6 +2,7 @@ import type { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 
+import { getRequestId, REQUEST_ID_HEADER } from "./request-observability";
 import {
   ApiError,
   buildErrorEnvelope,
@@ -14,6 +15,11 @@ import {
 
 export function registerErrorEnvelope(app: Hono): void {
   app.notFound((c) => {
+    const requestId = getRequestId(c);
+    if (requestId) {
+      c.header(REQUEST_ID_HEADER, requestId);
+    }
+
     return c.json(
       buildErrorEnvelope(c.req.path, NOT_FOUND_ERROR_CODE, NOT_FOUND_MESSAGE),
       404
@@ -21,6 +27,11 @@ export function registerErrorEnvelope(app: Hono): void {
   });
 
   app.onError((error, c) => {
+    const requestId = getRequestId(c);
+    if (requestId) {
+      c.header(REQUEST_ID_HEADER, requestId);
+    }
+
     if (error instanceof ApiError) {
       return c.json(
         buildErrorEnvelope(c.req.path, error.code, error.message, error.details),

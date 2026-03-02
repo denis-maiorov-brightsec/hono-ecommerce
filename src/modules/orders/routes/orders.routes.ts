@@ -24,6 +24,17 @@ export function createOrdersRouter(): Hono {
     return c.json(orders, 200);
   });
 
+  ordersRouter.post(
+    "/:id/cancel",
+    validateRequest("param", orderIdParamsSchema),
+    async (c) => {
+      const { id } = getValidatedData<OrderIdParams>(c, "param");
+      const order = await ordersService.cancelOrderById(id);
+
+      return c.json(order, 200);
+    }
+  );
+
   ordersRouter.get(
     "/:id",
     validateRequest("param", orderIdParamsSchema),

@@ -1,13 +1,13 @@
 import { Hono } from "hono";
 
 import {
-  paginationQuerySchema,
-  type PaginationQuery
-} from "../../../common/pagination";
-import {
   getValidatedData,
   validateRequest
 } from "../../../common/validation/request-validator";
+import {
+  listProductsQuerySchema,
+  type ListProductsQuery
+} from "../dto/list-products.dto";
 import {
   createProductSchema,
   productIdParamsSchema,
@@ -23,11 +23,15 @@ export function createProductsRouter(): Hono {
   const productsRouter = new Hono();
   const productsService = new ProductsService(new ProductsRepository());
 
-  productsRouter.get("/", validateRequest("query", paginationQuerySchema), async (c) => {
-    const pagination = getValidatedData<PaginationQuery>(c, "query");
-    const products = await productsService.listProducts(pagination);
-    return c.json(products, 200);
-  });
+  productsRouter.get(
+    "/",
+    validateRequest("query", listProductsQuerySchema),
+    async (c) => {
+      const pagination = getValidatedData<ListProductsQuery>(c, "query");
+      const products = await productsService.listProducts(pagination);
+      return c.json(products, 200);
+    }
+  );
 
   productsRouter.get(
     "/:id",

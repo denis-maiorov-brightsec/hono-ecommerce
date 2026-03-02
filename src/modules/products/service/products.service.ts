@@ -1,10 +1,10 @@
 import { ApiError, NOT_FOUND_ERROR_CODE } from "../../../common/errors";
 import {
   buildPaginatedResponse,
-  type PaginatedResponse,
-  type PaginationQuery
+  type PaginatedResponse
 } from "../../../common/pagination";
 
+import type { ListProductsQuery } from "../dto/list-products.dto";
 import {
   ProductsRepository,
   type CreateProductRecord,
@@ -18,7 +18,7 @@ export class ProductsService {
   constructor(private readonly productsRepository: ProductsRepository) {}
 
   async listProducts(
-    pagination: PaginationQuery
+    pagination: ListProductsQuery
   ): Promise<PaginatedResponse<ProductRecord>> {
     const [items, total] = await Promise.all([
       this.productsRepository.findPage(pagination.offset, pagination.limit),

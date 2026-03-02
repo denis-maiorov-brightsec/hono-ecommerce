@@ -2,12 +2,29 @@ import { beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 
 import { createApp } from "../../src/app";
+import { AUTH_TEST_TOKENS } from "../../src/common/middleware/auth-stub";
 import { db } from "../../src/db/client";
 import { promotions } from "../../src/db/schema";
 
 function expectIsoTimestamp(value: unknown): void {
   expect(typeof value).toBe("string");
   expect(Number.isNaN(Date.parse(value as string))).toBe(false);
+}
+
+const PROMOTIONS_MANAGER_BEARER = `Bearer ${AUTH_TEST_TOKENS.PROMOTIONS_MANAGER}`;
+
+async function requestPromotions(
+  app: ReturnType<typeof createApp>,
+  path: string,
+  init?: RequestInit
+): Promise<Response> {
+  const headers = new Headers(init?.headers);
+  headers.set("authorization", PROMOTIONS_MANAGER_BEARER);
+
+  return app.request(path, {
+    ...init,
+    headers
+  });
 }
 
 async function createPromotion(
@@ -22,7 +39,7 @@ async function createPromotion(
     endsAt?: string | null;
   }
 ): Promise<{ id: number }> {
-  const response = await app.request("/v1/promotions", {
+  const response = await requestPromotions(app, "/v1/promotions", {
     method: "POST",
     headers: {
       "content-type": "application/json"
@@ -46,7 +63,7 @@ describe("promotions CRUD routes", () => {
   });
 
   it("supports create, list, get, patch, and delete flow", async () => {
-    const createResponse = await app.request("/v1/promotions", {
+    const createResponse = await requestPromotions(app, "/v1/promotions", {
       method: "POST",
       headers: {
         "content-type": "application/json"
@@ -77,7 +94,7 @@ describe("promotions CRUD routes", () => {
     expectIsoTimestamp(created.createdAt);
     expectIsoTimestamp(created.updatedAt);
 
-    const listResponse = await app.request("/v1/promotions");
+    const listResponse = await requestPromotions(app, "/v1/promotions");
     expect(listResponse.status).toBe(200);
     const listed = await listResponse.json();
     expect(Array.isArray(listed)).toBe(true);
@@ -93,7 +110,7 @@ describe("promotions CRUD routes", () => {
       status: "active"
     });
 
-    const getResponse = await app.request(`/v1/promotions/${created.id}`);
+    const getResponse = await requestPromotions(app, `/v1/promotions/${created.id}`);
     expect(getResponse.status).toBe(200);
     const fetched = await getResponse.json();
     expect(fetched).toMatchObject({
@@ -107,16 +124,20 @@ describe("promotions CRUD routes", () => {
       status: "active"
     });
 
-    const patchResponse = await app.request(`/v1/promotions/${created.id}`, {
-      method: "PATCH",
-      headers: {
-        "content-type": "application/json"
-      },
-      body: JSON.stringify({
-        discountValue: 20,
-        status: "scheduled"
-      })
-    });
+    const patchResponse = await requestPromotions(
+      app,
+      `/v1/promotions/${created.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          discountValue: 20,
+          status: "scheduled"
+        })
+      }
+    );
 
     expect(patchResponse.status).toBe(200);
     const patched = await patchResponse.json();
@@ -131,13 +152,16 @@ describe("promotions CRUD routes", () => {
       status: "scheduled"
     });
 
-    const deleteResponse = await app.request(`/v1/promotions/${created.id}`, {
+    const deleteResponse = await requestPromotions(app, `/v1/promotions/${created.id}`, {
       method: "DELETE"
     });
     expect(deleteResponse.status).toBe(204);
     expect(await deleteResponse.text()).toBe("");
 
-    const getMissingResponse = await app.request(`/v1/promotions/${created.id}`);
+    const getMissingResponse = await requestPromotions(
+      app,
+      `/v1/promotions/${created.id}`
+    );
     expect(getMissingResponse.status).toBe(404);
     const getMissingBody = await getMissingResponse.json();
     expectIsoTimestamp(getMissingBody.timestamp);
@@ -149,7 +173,7 @@ describe("promotions CRUD routes", () => {
   });
 
   it("returns 409 when creating duplicate promotion code", async () => {
-    const firstResponse = await app.request("/v1/promotions", {
+    const firstResponse = await requestPromotions(app, "/v1/promotions", {
       method: "POST",
       headers: {
         "content-type": "application/json"
@@ -165,7 +189,7 @@ describe("promotions CRUD routes", () => {
 
     expect(firstResponse.status).toBe(201);
 
-    const duplicateResponse = await app.request("/v1/promotions", {
+    const duplicateResponse = await requestPromotions(app, "/v1/promotions", {
       method: "POST",
       headers: {
         "content-type": "application/json"
@@ -190,7 +214,7 @@ describe("promotions CRUD routes", () => {
   });
 
   it("returns 400 for invalid date windows on create and patch", async () => {
-    const invalidCreateResponse = await app.request("/v1/promotions", {
+    const invalidCreateResponse = await requestPromotions(app, "/v1/promotions", {
       method: "POST",
       headers: {
         "content-type": "application/json"
@@ -229,15 +253,19 @@ describe("promotions CRUD routes", () => {
       status: "active"
     });
 
-    const invalidPatchResponse = await app.request(`/v1/promotions/${created.id}`, {
-      method: "PATCH",
-      headers: {
-        "content-type": "application/json"
-      },
-      body: JSON.stringify({
-        startsAt: "2025-05-01T00:00:00.000Z"
-      })
-    });
+    const invalidPatchResponse = await requestPromotions(
+      app,
+      `/v1/promotions/${created.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          startsAt: "2025-05-01T00:00:00.000Z"
+        })
+      }
+    );
 
     expect(invalidPatchResponse.status).toBe(400);
     const invalidPatchBody = await invalidPatchResponse.json();
@@ -254,7 +282,7 @@ describe("promotions CRUD routes", () => {
   });
 
   it("returns 404 when deleting a missing promotion", async () => {
-    const response = await app.request("/v1/promotions/999999", {
+    const response = await requestPromotions(app, "/v1/promotions/999999", {
       method: "DELETE"
     });
 

@@ -1,6 +1,11 @@
 import { Hono } from "hono";
 
 import {
+  PROMOTIONS_MANAGE_ROLE,
+  requireAuthenticated,
+  requireRoles
+} from "../../../common/middleware/auth-stub";
+import {
   getValidatedData,
   validateRequest
 } from "../../../common/validation/request-validator";
@@ -18,6 +23,12 @@ import { PromotionsService } from "../service/promotions.service";
 export function createPromotionsRouter(): Hono {
   const promotionsRouter = new Hono();
   const promotionsService = new PromotionsService(new PromotionsRepository());
+
+  promotionsRouter.use(
+    "*",
+    requireAuthenticated(),
+    requireRoles([PROMOTIONS_MANAGE_ROLE])
+  );
 
   promotionsRouter.get("/", async (c) => {
     const promotions = await promotionsService.listPromotions();

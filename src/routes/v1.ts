@@ -2,6 +2,7 @@ import { Hono } from "hono";
 
 import { createCategoriesRouter } from "../modules/categories/routes/categories.routes";
 import { createOrdersRouter } from "../modules/orders/routes/orders.routes";
+import { createPromotionsRouter } from "../modules/promotions/routes/promotions.routes";
 import { createProductsRouter } from "../modules/products/routes/products.routes";
 
 export function registerV1Routes(app: Hono): void {
@@ -14,6 +15,7 @@ export function registerV1Routes(app: Hono): void {
   v1.route("/products", createProductsRouter());
   v1.route("/categories", createCategoriesRouter());
   v1.route("/orders", createOrdersRouter());
+  v1.route("/promotions", createPromotionsRouter());
 
   app.route("/v1", v1);
 }

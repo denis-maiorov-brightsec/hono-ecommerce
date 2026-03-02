@@ -10,16 +10,23 @@ import {
   type ListOrdersQuery,
   type OrderIdParams
 } from "../dto/orders.dto";
-import { OrdersRepository } from "../repository/orders.repository";
-import { OrdersService } from "../service/orders.service";
+import { OrdersCommandsRepository } from "../commands/orders.commands.repository";
+import { OrdersCommandsService } from "../commands/orders.commands.service";
+import { OrdersQueriesRepository } from "../queries/orders.queries.repository";
+import { OrdersQueriesService } from "../queries/orders.queries.service";
 
 export function createOrdersRouter(): Hono {
   const ordersRouter = new Hono();
-  const ordersService = new OrdersService(new OrdersRepository());
+  const ordersQueriesService = new OrdersQueriesService(
+    new OrdersQueriesRepository()
+  );
+  const ordersCommandsService = new OrdersCommandsService(
+    new OrdersCommandsRepository()
+  );
 
   ordersRouter.get("/", validateRequest("query", listOrdersQuerySchema), async (c) => {
     const query = getValidatedData<ListOrdersQuery>(c, "query");
-    const orders = await ordersService.listOrders(query);
+    const orders = await ordersQueriesService.listOrders(query);
 
     return c.json(orders, 200);
   });
@@ -29,7 +36,7 @@ export function createOrdersRouter(): Hono {
     validateRequest("param", orderIdParamsSchema),
     async (c) => {
       const { id } = getValidatedData<OrderIdParams>(c, "param");
-      const order = await ordersService.cancelOrderById(id);
+      const order = await ordersCommandsService.cancelOrderById(id);
 
       return c.json(order, 200);
     }
@@ -40,7 +47,7 @@ export function createOrdersRouter(): Hono {
     validateRequest("param", orderIdParamsSchema),
     async (c) => {
       const { id } = getValidatedData<OrderIdParams>(c, "param");
-      const order = await ordersService.getOrderById(id);
+      const order = await ordersQueriesService.getOrderById(id);
 
       return c.json(order, 200);
     }

@@ -20,7 +20,7 @@ function buildListWhereClause(filters: ListOrdersFilters) {
   );
 }
 
-export class OrdersRepository {
+export class OrdersQueriesRepository {
   async findPage(
     offset: number,
     limit: number,
@@ -46,19 +46,6 @@ export class OrdersRepository {
 
   async findById(id: number): Promise<OrderRecord | undefined> {
     const [order] = await db.select().from(orders).where(eq(orders.id, id));
-    return order;
-  }
-
-  async cancelPendingById(id: number): Promise<OrderRecord | undefined> {
-    const [order] = await db
-      .update(orders)
-      .set({
-        status: "cancelled",
-        updatedAt: new Date()
-      })
-      .where(and(eq(orders.id, id), eq(orders.status, "pending")))
-      .returning();
-
     return order;
   }
 }

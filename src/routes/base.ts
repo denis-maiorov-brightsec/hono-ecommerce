@@ -2,13 +2,10 @@ import type { Hono } from "hono";
 
 export function registerBaseRoutes(app: Hono): void {
   app.get("/", (c) => {
-    return c.json({
-      service: "hono-ecommerce",
-      message: "unversioned routes are temporary and will move under /v1"
-    });
-  });
+    c.header("Deprecation", "true");
 
-  app.get("/health", (c) => {
-    return c.json({ status: "ok" });
+    return c.json({
+      message: "This unversioned root route is deprecated. Migrate to /v1/health."
+    });
   });
 }

@@ -5,20 +5,26 @@ import { createApp } from "../../src/app";
 describe("scaffold smoke", () => {
   const app = createApp();
 
-  it("returns baseline root payload", async () => {
+  it("returns deprecated root payload", async () => {
     const response = await app.request("/");
 
     expect(response.status).toBe(200);
+    expect(response.headers.get("deprecation")).toBe("true");
     expect(await response.json()).toEqual({
-      service: "hono-ecommerce",
-      message: "unversioned routes are temporary and will move under /v1"
+      message: "This unversioned root route is deprecated. Migrate to /v1/health."
     });
   });
 
-  it("returns baseline health payload", async () => {
-    const response = await app.request("/health");
+  it("returns versioned health payload", async () => {
+    const response = await app.request("/v1/health");
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ status: "ok" });
+  });
+
+  it("does not expose unversioned health route", async () => {
+    const response = await app.request("/health");
+
+    expect(response.status).toBe(404);
   });
 });

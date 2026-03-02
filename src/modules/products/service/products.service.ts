@@ -1,4 +1,9 @@
 import { ApiError, NOT_FOUND_ERROR_CODE } from "../../../common/errors";
+import {
+  buildPaginatedResponse,
+  type PaginatedResponse,
+  type PaginationQuery
+} from "../../../common/pagination";
 
 import {
   ProductsRepository,
@@ -12,8 +17,19 @@ const PRODUCT_NOT_FOUND_MESSAGE = "Product not found";
 export class ProductsService {
   constructor(private readonly productsRepository: ProductsRepository) {}
 
-  async listProducts(): Promise<ProductRecord[]> {
-    return this.productsRepository.findAll();
+  async listProducts(
+    pagination: PaginationQuery
+  ): Promise<PaginatedResponse<ProductRecord>> {
+    const [items, total] = await Promise.all([
+      this.productsRepository.findPage(pagination.offset, pagination.limit),
+      this.productsRepository.countAll()
+    ]);
+
+    return buildPaginatedResponse(items, {
+      page: pagination.page,
+      limit: pagination.limit,
+      total
+    });
   }
 
   async getProductById(id: number): Promise<ProductRecord> {

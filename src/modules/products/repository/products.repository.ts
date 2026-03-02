@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { asc, count, eq } from "drizzle-orm";
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 
 import { db } from "../../../db/client";
@@ -14,8 +14,18 @@ export type CreateProductRecord = Pick<
 export type UpdateProductRecord = Partial<CreateProductRecord>;
 
 export class ProductsRepository {
-  async findAll(): Promise<ProductRecord[]> {
-    return db.select().from(products).orderBy(asc(products.id));
+  async findPage(offset: number, limit: number): Promise<ProductRecord[]> {
+    return db
+      .select()
+      .from(products)
+      .orderBy(asc(products.id))
+      .offset(offset)
+      .limit(limit);
+  }
+
+  async countAll(): Promise<number> {
+    const [result] = await db.select({ total: count() }).from(products);
+    return Number(result?.total ?? 0);
   }
 
   async findById(id: number): Promise<ProductRecord | undefined> {

@@ -14,14 +14,14 @@ This backlog is intentionally sequenced to mimic real ecommerce product work: fe
 | 002 | Global validation middleware + consistent error envelope | 001 | Done |
 | 003 | `/v1/products` CRUD | 002 | Done |
 | 004 | `/v1/categories` CRUD | 002 | Done |
-| 005 | Shared pagination helper + products refactor | 003 | Ready |
-| 006 | `/v1/orders` list + detail (status/date filters) | 002, 005 | Blocked |
+| 005 | Shared pagination helper + products refactor | 003 | Done |
+| 006 | `/v1/orders` list + detail (status/date filters) | 002, 005 | Ready |
 | 007 | `/v1/orders/:id/cancel` state transition | 006 | Blocked |
 | 008 | `/v1/promotions` CRUD | 002 | Ready |
 | 009 | Auth middleware stub + protect promotions endpoints | 008 | Blocked |
 | 010 | Write-route rate limiting middleware | 003, 004, 007, 009 | Blocked |
 | 011 | Request ID + structured request logging middleware | 002 | Ready |
-| 012 | `/v1/search/products?q=` (reuse products data service) | 003, 005 | Blocked |
+| 012 | `/v1/search/products?q=` (reuse products data service) | 003, 005 | Ready |
 | 013 | Rename `product.sku` -> `product.stockKeepingUnit` | 003, 012 | Blocked |
 | 014 | Refactor orders into `queries/commands` folders | 007 | Blocked |
 | 015 | Contract tests for products routes | 013 | Blocked |

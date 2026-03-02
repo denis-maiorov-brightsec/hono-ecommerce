@@ -1,8 +1,8 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "bun:test";
+import { beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 
 import { createApp } from "../../src/app";
-import { closeDbPool, db } from "../../src/db/client";
+import { db } from "../../src/db/client";
 import { products } from "../../src/db/schema";
 
 function expectIsoTimestamp(value: unknown): void {
@@ -19,10 +19,6 @@ describe("products CRUD routes", () => {
 
   beforeEach(async () => {
     await db.delete(products);
-  });
-
-  afterAll(async () => {
-    await closeDbPool();
   });
 
   it("supports create, list, get, patch, and delete flow", async () => {

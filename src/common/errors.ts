@@ -17,6 +17,7 @@ export type ErrorEnvelope = {
 
 export const INTERNAL_SERVER_ERROR_CODE = "INTERNAL_SERVER_ERROR";
 export const INTERNAL_SERVER_ERROR_MESSAGE = "Internal server error";
+export const CONFLICT_ERROR_CODE = "CONFLICT";
 export const NOT_FOUND_ERROR_CODE = "NOT_FOUND";
 export const NOT_FOUND_MESSAGE = "Route not found";
 export const VALIDATION_ERROR_CODE = "VALIDATION_ERROR";

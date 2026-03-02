@@ -8,6 +8,13 @@
       "when": 1772459992311,
       "tag": "0000_worried_dexter_bennett",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1772460533236,
+      "tag": "0001_exotic_weapon_omega",
+      "breakpoints": true
     }
   ]
 }

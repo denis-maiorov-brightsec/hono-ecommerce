@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 
+import { createCategoriesRouter } from "../modules/categories/routes/categories.routes";
 import { createProductsRouter } from "../modules/products/routes/products.routes";
 
 export function registerV1Routes(app: Hono): void {
@@ -10,6 +11,7 @@ export function registerV1Routes(app: Hono): void {
   });
 
   v1.route("/products", createProductsRouter());
+  v1.route("/categories", createCategoriesRouter());
 
   app.route("/v1", v1);
 }

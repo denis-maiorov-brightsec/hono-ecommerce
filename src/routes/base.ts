@@ -1,6 +1,6 @@
 import type { Hono } from "hono";
 
-export function registerBaseRoutes(app: Hono): void {
+export function registerBaseRoutes(app: Hono<any>): void {
   app.get("/", (c) => {
     c.header("Deprecation", "true");
 

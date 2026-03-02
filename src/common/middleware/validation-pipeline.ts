@@ -24,7 +24,7 @@ function mapZodIssuesToDetails(issues: ZodIssue[]): ValidationDetail[] {
   }));
 }
 
-export function registerValidationPipeline(app: Hono): void {
+export function registerValidationPipeline(app: Hono<any>): void {
   app.use("*", async (_c, next) => {
     try {
       await next();

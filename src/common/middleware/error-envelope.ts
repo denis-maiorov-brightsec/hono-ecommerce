@@ -13,7 +13,7 @@ import {
   NOT_FOUND_MESSAGE
 } from "../errors";
 
-export function registerErrorEnvelope(app: Hono): void {
+export function registerErrorEnvelope(app: Hono<any>): void {
   app.notFound((c) => {
     const requestId = getRequestId(c);
     if (requestId) {

@@ -15,7 +15,7 @@ export type RegisterV1RoutesOptions = {
 };
 
 export function registerV1Routes(
-  app: Hono,
+  app: Hono<any>,
   options: RegisterV1RoutesOptions = {}
 ): void {
   const v1 = new Hono();

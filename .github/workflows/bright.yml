@@ -1,0 +1,74 @@
+name: Bright
+
+on:
+  pull_request:
+    branches:
+      - '**'
+
+permissions:
+  checks: write
+  contents: read
+  id-token: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Bun runtime
+        run: |
+          curl -fsSL https://bun.sh/install | bash
+
+      - name: Copy environment file
+        run: |
+          cp .env.example .env
+
+      - name: Start PostgreSQL via Docker Compose
+        run: |
+          docker compose up -d
+
+      - name: Install dependencies
+        run: |
+          bun install
+
+      - name: Run database migrations
+        run: |
+          bun run db:migrate
+
+      - name: Start application
+        run: |
+          docker compose up -d && bun run start &
+
+      - name: Probe application readiness
+        run: |
+          i=1; while [ "$i" -le 30 ]; do curl -sS -o /dev/null http://127.0.0.1:3000 && exit 0; sleep 5; i=$((i + 1)); done; exit 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: Install SecTesterJS dependencies
+        run: |
+          npm i --save=false --prefix .brightsec @sectester/core@0.50.0 @sectester/repeater@0.50.0 @sectester/scan@0.50.0 @sectester/runner@0.50.0 @sectester/reporter@0.50.0
+
+      - name: Configure Bright credentials
+        uses: ./.github/workflows/composite/configure-bright-credentials
+        with:
+          BRIGHT_HOSTNAME: app.brightsec.com
+          BRIGHT_PROJECT_ID: gE6RYHeZ6s8vkV4KcqTu8r
+          BRIGHT_TOKEN: ${{ secrets.BRIGHT_TOKEN }}
+
+      - name: Run security tests
+        env:
+          BRIGHT_HOSTNAME: app.brightsec.com
+          BRIGHT_PROJECT_ID: gE6RYHeZ6s8vkV4KcqTu8r
+          BRIGHT_AUTH_ID: ${{ env.BRIGHT_AUTH_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRIGHT_TOKEN: ${{ env.BRIGHT_TOKEN }}
+          BRIGHT_TARGET_URL: http://127.0.0.1:3000
+          SECTESTER_SCAN_POOL_SIZE: ${{ vars.SECTESTER_SCAN_POOL_SIZE }}
+        run: |
+          node --experimental-transform-types --experimental-strip-types --experimental-detect-module --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=ExperimentalWarning --test-force-exit --test-concurrency=4 --test .brightsec/tests/*.test.ts

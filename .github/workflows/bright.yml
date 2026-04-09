@@ -20,6 +20,7 @@ jobs:
       - name: Install Bun runtime
         run: |
           curl -fsSL https://bun.sh/install | bash
+          echo "$HOME/.bun/bin" >> $GITHUB_PATH
 
       - name: Copy environment file
         run: |
